@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     # "apps.cameras",
     # "apps.dashboard",
-    # "apps.modules",
+    "apps.modules.productivity",
     # "apps.settings",
     
     
