@@ -17,33 +17,15 @@ Lo que NO se debe hacer en este archivo:
 - Manejo de peticiones HTTP o respuestas al cliente
 """
 
-# class user(AbstractUser):
-#     ROLE_CHOICES = (
-#         ("administrador", "Administrador"),
-#         ("supervisador", "Supervisador"),
-#         ('usuario', 'Usuario'),
-#     )
-    
-#     email = models.EmailField(unique=True)
-#     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    
-#     USERNAME_FIELD = "email"
-#     REQUIRED_FIELDS = ['username']
-    
-#     def __str__(self):
-#         return f"{self.email} ({self.role})"
-    
 
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('admin', 'Administrador'),
+        ('supervisor', 'Supervisor'),
+    )
 
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='supervisor')
+    phone = models.CharField(max_length=15, blank=True, null=True)
 
-
-
-
-class Person(AbstractUser):
-    name = models.CharField(max_length=20)
-    
     def __str__(self):
-        return f"name:{self.name}"
-
-
-
+        return f"{self.username} ({self.role})"

@@ -1,61 +1,57 @@
-from django.shortcuts import render
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-
-"""
-Archivo: views.py
-Propósito: Manejar las peticiones HTTP de la API y coordinar la lógica de negocio.
-
-Responsabilidades:
-- Recibir la petición del cliente (POST, GET, PUT, DELETE)
-- Llamar a los serializers para validar los datos
-- Ejecutar la lógica de negocio principal (por ejemplo, autenticación, creación de objetos, consultas)
-- Devolver respuestas HTTP adecuadas con datos o errores en formato JSON
-- Manejar permisos y autenticación (con decoradores o clases de DRF)
-
-Lo que NO se debe hacer en este archivo:
-- Definir la estructura de la base de datos (eso va en models.py)
-- Validar el formato de datos detalladamente (eso va en serializers.py)
-- Guardar datos directamente sin pasar por un serializer (es mejor mantener consistencia y validación)
-"""
-
-# class SignIn(APIView):
-#     def post(self, request):
-#         serializer = SignInSerializer(data=request.data)
-#         if serializer.is_valid():
-#             user = serializer.validated_data['user']
-#             token, created = Token.objects.get_or_create(user=user)
-#             return Response({
-#                 "message": "Login exitoso",
-#                 "token": token.key,
-#                 "user": {
-#                     "email": user.email,
-#                     "role": user.role,
-#                 }
-#             })
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+from rest_framework import status, permissions
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import CustomUser
+from .serializers import UserSerializer, LoginSerializer
+from django.contrib.auth.hashers import make_password
 
 
+# 🔐 LOGIN VIEW
+class SignInView(APIView):
+    permission_classes = [permissions.AllowAny]
 
-
-
-
-from apps.accounts.serializers import PruebaSerializer
-
-
-class Prueba(APIView):
     def post(self, request):
-        serializer = PruebaSerializer(data=request.data)
+        serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            name = serializer.validated_data['name']
-            return Response({"message": f"Hola, {name}!"})
-        return Response(serializer.errors, status=400)
-        
-    
+            user = serializer.validated_data
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'user': UserSerializer(user).data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# 👤 REGISTRO (solo admin puede crear usuarios)
+class SignUpUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
+    def post(self, request):
+        # ✅ Solo el administrador puede registrar usuarios
+        if request.user.role != 'admin':
+            return Response(
+                {'error': 'Solo el administrador puede crear usuarios.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        serializer = UserSerializer(data=request.data)
+
+        if serializer.is_valid():
+            # ✅ Encriptamos la contraseña antes de guardar
+            user = CustomUser.objects.create(
+                username=serializer.validated_data['username'],
+                email=serializer.validated_data['email'],
+                password=make_password(serializer.validated_data['password']),
+                role=serializer.validated_data.get('role', 'supervisor')
+            )
+            return Response(
+                {
+                    "message": "Usuario creado correctamente.",
+                    "user": UserSerializer(user).data
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
