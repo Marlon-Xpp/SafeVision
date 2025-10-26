@@ -12,11 +12,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -28,6 +32,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',  # opcional
+    ),
+}
 
 # Application definition
 
@@ -48,16 +58,16 @@ INSTALLED_APPS = [
     
     #Apps del sistema
     "apps.accounts",
+    'apps.workers',
     # "apps.cameras",
     # "apps.dashboard",
-    # "apps.modules",
-    # "apps.settings",
+    'apps.modules.epp',
+    "apps.settings",
     
     
 ]
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
-
+AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -78,10 +88,11 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # dominio de tu frontend React
+    "http://127.0.0.1:3000",
 ]
 
 # Si quieres permitir todo (solo en desarrollo)
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = "config.urls"
 
