@@ -1,62 +1,47 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from rest_framework.exceptions import AuthenticationFailed
+from .models import User
 
-"""
-Archivo: serializers.py
-Propósito: Definir cómo se transforman y validan los datos que entran y salen de la API.
+from rest_framework import serializers
+from django.contrib.auth import authenticate
+from rest_framework.exceptions import AuthenticationFailed
+from .models import User
 
-Responsabilidades:
-- Validar datos que vienen de la API (formato de email, longitud de contraseña, campos obligatorios, reglas de negocio)
-- Serializar modelos a JSON para enviarlos al cliente
-- Deserializar datos JSON del cliente y convertirlos en objetos de Python o modelos
-- Validar permisos simples (por ejemplo, solo administradores pueden hacer login aquí)
-- Preparar datos antes de guardarlos en la base de datos
+class SignInSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
-Lo que NO se debe hacer en este archivo:
-- Crear vistas o manejar peticiones HTTP
-- Hacer lógica compleja que involucre varios modelos o procesos largos (eso va en views.py o servicios)
-- Modificar la estructura de la base de datos (eso va en models.py)
-"""
+    def validate(self, data):
+        username = data.get("username")
+        password = data.get("password")
 
-# class SignInSerializer(serializers.Serializer):
-#     email = serializers.EmailField(
-#         allow_blank=False,
-#         error_messages={
-#             "blank": "El correo no puede estar vacío",
-#             "invalid": "Introduce un correo válido",
-#         }
-#     )
-    
-#     password = serializers.CharField(
-#         write_only=True,
-#         allow_blank=False,
-#         error_messages={"blank": "La contraseña no puede estar vacía"}
-#     )
-    
-#     def validate(self, data):
-#         email = data.get("email")
-#         password = data.get("password")
-        
-#         user = authenticate(username=email, password=password)
-#         if not user:
-#             raise serializers.ValidationError("Correo o contraseña incorrectos")
-        
-#         # Guardar el usuario validado
-#         data['user'] = user
-#         return data
-    
+        # Primero verificamos si el usuario existe
+        if not User.objects.filter(username=username).exists():
+            raise AuthenticationFailed("El usuario no existe en la base de datos.")
 
-from .models import Person
+        # Luego verificamos si la contraseña es válida
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise AuthenticationFailed("La contraseña es incorrecta.")
+
+        # Y por último, si el usuario está activo
+        if not user.is_active:
+            raise AuthenticationFailed("El usuario está inactivo.")
+
+        data["user"] = user
+        return data
 
 
-class PruebaSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Person
-        fields = ['name']
-    
-
-
-
-
-
-
+        model = User
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "username",
+            "email",
+            "phone",
+            "role",
+        ]
