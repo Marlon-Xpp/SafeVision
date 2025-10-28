@@ -26,7 +26,7 @@ class UserManager(BaseUserManager):
 # ✅ 2. Modelo principal del usuario (según tu entidad)
 class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
-        ("admin", "Administrador"),
+        ("admin", "Admin"),
         ("supervisor", "Supervisor"),
     )
 

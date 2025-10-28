@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 import os
@@ -37,6 +38,12 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',  # opcional
     ),
+    "EXCEPTION_HANDLER": "apps.utils.custom_exception_handler.custom_exception_handler"
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),   # token corto
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),      # token largo
 }
 
 # Application definition

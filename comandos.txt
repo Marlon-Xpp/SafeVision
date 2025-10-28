@@ -1,0 +1,53 @@
+SOLUCION RECOMENDADA
+npm install react@18 react-dom@18
+npm install
+npm run dev
+
+
+
+
+
+SOLUCION MAS RAPIDO PERO (NO RECOMENDADO)
+
+npm install --legacy-peer-deps
+npm run dev
+
+
+
+
+
+
+pip install --upgrade pip
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install ultralytics opencv-python mediapipe pyzbar
+
+
+
+pip install django djangorestframework djangorestframework-simplejwt django-cors-headers opencv-python pyzbar numpy Pillow
+pip install django djangorestframework djangorestframework-simplejwt django-cors-headers opencv-python pyzbar torch ultralytics numpy Pillow python-dotenv
+
+
+
+git merge origin/main
+Coloca el cursor sobre un mensaje para fijarlo
+keep
+Tú
+16:01
+pip install -r requirements.txt
+Tú
+16:16
+python3.11 --version
+python -m venv venv
+Tú
+16:18
+python -m pip install --upgrade pip
+Tú
+16:22
+.\venv\Scripts\activate
+Tú
+16:36
+python3.11 -m venv venv
+Tú
+16:42
+https://www.python.org/downloads/release/python-3119/
+3.11.9
